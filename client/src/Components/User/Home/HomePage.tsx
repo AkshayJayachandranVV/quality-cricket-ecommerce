@@ -32,12 +32,29 @@ export default function HomePage() {
 
   const API_BASE = process.env.REACT_APP_IMAGE_BASE_URL || 'http://localhost:5000';
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
   useEffect(() => {
-    const onResize = () => setWindowWidth(window.innerWidth);
+    const onResize = () => {
+      const width = window.innerWidth;
+      setWindowWidth(width);
+      setIsMobile(width < 992);
+      setIsTablet(width >= 768 && width < 1024);
+      setIsDesktop(width >= 1024);
+    };
     const onScroll = () => setScrollTop(window.scrollY > 400);
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll);
-    return () => { window.removeEventListener("resize", onResize); window.removeEventListener("scroll", onScroll); };
+    
+    // Initial check
+    onResize();
+    
+    return () => { 
+      window.removeEventListener("resize", onResize); 
+      window.removeEventListener("scroll", onScroll); 
+    };
   }, []);
 
   useEffect(() => {
@@ -61,11 +78,8 @@ export default function HomePage() {
     }
   };
 
-  const isMobile = windowWidth < 768;
-  const isTablet = windowWidth >= 768 && windowWidth < 1024;
-  const isDesktop = windowWidth >= 1024;
-
   const cols = isDesktop ? 5 : isTablet ? 3 : 2;
+  const topSellerCols = isDesktop ? 5 : isTablet ? 3 : 2;
 
   const filteredProducts =
     activeFilter === "All Products"
@@ -112,13 +126,13 @@ export default function HomePage() {
   });
 
   return (
-    <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f7f8fc", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f7f8fc", minHeight: "100vh", width: "100%", overflowX: "hidden" }}>
 
       {/* ═══════════════════════════ NAVBAR ═══════════════════════════ */}
       <Navbar />
 
       {/* ═══════════════════════════ HERO BANNER ═══════════════════════════ */}
-      <div style={{ width: "100%", padding: "0 12px", boxSizing: "border-box", maxWidth: 1440, margin: "0 auto", marginTop: 12 }}>
+      <div style={{ width: "100%", padding: isMobile ? "0 8px" : "0 20px", boxSizing: "border-box", maxWidth: 1800, margin: "0 auto", marginTop: 12 }}>
         <div style={{
           position: "relative", width: "100%", aspectRatio: "1397 / 483",
           overflow: "hidden", background: "#1a1a2e", borderRadius: 4,
@@ -154,13 +168,13 @@ export default function HomePage() {
             {/* PREMIUM Box */}
             <div style={{
               background: "linear-gradient(87.3deg, #3F51B5 3.47%, #BC67B6 123.24%)",
-              width: "23.7vw", maxWidth: 332, height: "24%", minHeight: 40,
+              width: isMobile ? "60vw" : "23.7vw", maxWidth: 332, height: isMobile ? "20%" : "24%", minHeight: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
               transform: "skewX(-12deg)", borderRadius: 2
             }}>
               <span style={{
-                color: "white", fontSize: "clamp(20px, 4vw, 52px)", fontWeight: 900,
-                textTransform: "uppercase", letterSpacing: 2, transform: "skewX(12deg)"
+                color: "white", fontSize: "clamp(16px, 4vw, 52px)", fontWeight: 900,
+                textTransform: "uppercase", letterSpacing: isMobile ? 1 : 2, transform: "skewX(12deg)"
               }}>
                 PREMIUM
               </span>
@@ -168,7 +182,7 @@ export default function HomePage() {
 
             {/* Cricket Accessories Text */}
             <div style={{ padding: "0", margin: "1% 0" }}>
-              <span style={{ color: "white", fontSize: "clamp(16px, 2.5vw, 32px)", fontWeight: 700, textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}>
+              <span style={{ color: "white", fontSize: "clamp(12px, 2.5vw, 32px)", fontWeight: 700, textShadow: "0 2px 4px rgba(0,0,0,0.6)", textAlign: "center" }}>
                 Cricket Accessories
               </span>
             </div>
@@ -176,10 +190,10 @@ export default function HomePage() {
             {/* Buy Now Box */}
             <div style={{
               background: "linear-gradient(87.3deg, #3F51B5 3.47%, #BC67B6 123.24%)",
-              padding: "2% 8%", display: "inline-flex", alignItems: "center", justifyContent: "center",
+              padding: isMobile ? "1.5% 6%" : "2% 8%", display: "inline-flex", alignItems: "center", justifyContent: "center",
               transform: "skewX(-12deg)", cursor: "pointer", borderRadius: 2
             }}>
-              <span style={{ color: "white", fontSize: "clamp(14px, 1.8vw, 24px)", fontWeight: 800, transform: "skewX(12deg)" }}>
+              <span style={{ color: "white", fontSize: "clamp(12px, 1.8vw, 24px)", fontWeight: 800, transform: "skewX(12deg)" }}>
                 Buy Now
               </span>
             </div>
@@ -210,7 +224,7 @@ export default function HomePage() {
       </div>
 
       {/* ═══════════════════════════ TOP SELLERS ═══════════════════════════ */}
-      <section style={{ padding: isMobile ? "36px 16px" : "52px 20px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+      <section style={{ padding: isMobile ? "36px 16px" : "52px 20px", maxWidth: 1800, margin: "0 auto", width: "100%" }}>
         <h2 style={sectionTitle}>Top Sellers</h2>
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: isMobile ? 12 : 20, marginBottom: isMobile ? 24 : 40 }}>
           {products.slice(0, cols).map((p) => (
@@ -241,7 +255,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════ FEATURED PRODUCTS ═══════════════════════════ */}
-      <section style={{ padding: isMobile ? "0 16px 40px" : "0 20px 60px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+      <section style={{ padding: isMobile ? "0 16px 40px" : "0 20px 60px", maxWidth: 1800, margin: "0 auto", width: "100%" }}>
         <h2 style={sectionTitle}>Featured Products</h2>
 
         {/* Filter tabs */}
@@ -299,7 +313,7 @@ export default function HomePage() {
 
       {/* ═══════════════════════════ ABOUT US ═══════════════════════════ */}
       <section style={{ background: "white", padding: isMobile ? "40px 16px" : "64px 20px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1800, margin: "0 auto" }}>
           <h2 style={sectionTitle}>About Us</h2>
           <div style={{ display: "flex", gap: isMobile ? 0 : 48, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "center" : "flex-start" }}>
 
@@ -334,7 +348,7 @@ export default function HomePage() {
 
       {/* ═══════════════════════════ CUSTOMER REVIEWS ═══════════════════════════ */}
       <section style={{ padding: isMobile ? "40px 16px" : "64px 20px", background: "#f7f8fc" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1800, margin: "0 auto" }}>
           <h2 style={sectionTitle}>Customer Reviews</h2>
           <p style={{ textAlign: "center", color: "#888", fontSize: 14, marginTop: -20, marginBottom: isMobile ? 24 : 36 }}>What our customer say about quality cricket</p>
 

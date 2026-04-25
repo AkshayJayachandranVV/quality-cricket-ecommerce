@@ -21,7 +21,7 @@ export default function Footer() {
   return (
     <>
       <footer style={{ background: "#3F51B5", color: "white", padding: isMobile ? "36px 16px 24px" : "52px 20px 32px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1800, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "2fr 1fr 1fr", gap: isMobile ? 32 : 40, marginBottom: 40 }}>
 
             {/* Column 1 */}
