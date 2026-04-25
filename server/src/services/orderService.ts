@@ -6,13 +6,15 @@ let rzpInstance: any = null;
 
 const getRazorpay = () => {
     if (!rzpInstance) {
-        const key_id = process.env.RAZORPAY_API_KEY;
-        const key_secret = process.env.RAZORPAY_KEY_SECRET;
+        const key_id = (process.env.RAZORPAY_API_KEY || '').trim();
+        const key_secret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
 
         if (!key_id || !key_secret) {
-            console.error('Razorpay keys are missing. Payment functionality will be disabled.');
+            console.error('❌ Razorpay keys are missing or empty in .env! (RAZORPAY_API_KEY/RAZORPAY_KEY_SECRET)');
             return null;
         }
+
+        console.log(`💳 Initializing Razorpay with Key ID: ${key_id.substring(0, 12)}... (Secret length: ${key_secret.length})`);
 
         rzpInstance = new Razorpay({
             key_id,
@@ -58,7 +60,10 @@ export const createRazorpayOrder = async (userId: number, productId: number, qua
     const amount = unitPrice * quantity;
     
     const rzp = getRazorpay();
-    if (!rzp) throw new Error('Razorpay service unavailable');
+    if (!rzp) {
+        console.error('❌ Razorpay Instance could not be initialized. Check .env keys.');
+        throw new Error('Payment service is currently unavailable');
+    }
 
     const options = {
         amount: Math.round(amount * 100),
@@ -66,26 +71,36 @@ export const createRazorpayOrder = async (userId: number, productId: number, qua
         receipt: `receipt_${Date.now()}`,
     };
 
-    const rzpOrder = await rzp.orders.create(options);
+    console.log('📦 Creating Razorpay Order with options:', options);
 
-    const order = await db.Order.create({
-        userId,
-        productId,
-        quantity,
-        totalAmount: amount,
-        status: 'Pending',
-        paymentStatus: 'Unpaid',
-        razorpayOrderId: rzpOrder.id,
-        shippingAddress
-    });
+    try {
+        const rzpOrder = await rzp.orders.create(options);
+        console.log('✅ Razorpay Order Created:', rzpOrder.id);
 
-    return {
-        orderId: order.id,
-        razorpayOrderId: rzpOrder.id,
-        amount: options.amount,
-        currency: options.currency,
-        key_id: process.env.RAZORPAY_API_KEY
-    };
+        const order = await db.Order.create({
+            userId,
+            productId,
+            quantity,
+            totalAmount: amount,
+            status: 'Pending',
+            paymentStatus: 'Unpaid',
+            razorpayOrderId: rzpOrder.id,
+            shippingAddress
+        });
+
+        return {
+            orderId: order.id,
+            razorpayOrderId: rzpOrder.id,
+            amount: options.amount,
+            currency: options.currency,
+            key_id: process.env.RAZORPAY_API_KEY
+        };
+    } catch (error: any) {
+        console.error('❌ Razorpay API Error:', error);
+        // Razorpay puts the description inside error.error.description
+        const errorMessage = error.error?.description || error.description || error.message || 'Razorpay order creation failed';
+        throw new Error(errorMessage);
+    }
 };
 
 export const verifyPayment = async (razorpayOrderId: string, razorpayPaymentId: string, signature: string) => {
