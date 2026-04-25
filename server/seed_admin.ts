@@ -5,19 +5,21 @@ async function seedAdmin() {
     try {
         console.log('Seeding admin user...');
         
-        const existing = await db.User.findOne({ where: { email: 'admin@gmail.com' } });
+        const adminEmail = process.env['ADMIN_EMAIL'] || 'admin@qualitycricket.com';
+        const existing = await db.User.findOne({ where: { email: adminEmail } });
         if (existing) {
             console.log('Admin user already exists.');
             process.exit(0);
         }
 
-        const passwordHash = await bcrypt.hash('admin', 10);
+        const password = process.env['ADMIN_PASSWORD'] || 'admin@123';
+        const passwordHash = await bcrypt.hash(password, 10);
         
         await db.User.create({
-            firstName: 'admin',
-            lastName: 'admin',
-            email: 'admin@gmail.com',
-            phoneNumber: '0000000000', // Dummy phone number
+            firstName: 'System',
+            lastName: 'Admin',
+            email: adminEmail,
+            phoneNumber: '0000000000',
             passwordHash,
             role: 'Admin',
             isVerified: true

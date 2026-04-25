@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const dbConfig = {
-    HOST: process.env['DB_HOST'] || 'localhost',
-    USER: process.env['DB_USER'] || 'root',
-    PASSWORD: process.env['DB_PASSWORD'] || '',
-    DB: process.env['DB_NAME'] || 'quality_cricket_db',
+    HOST: process.env['DB_HOST'] as string,
+    USER: process.env['DB_USER'] as string,
+    PASSWORD: process.env['DB_PASSWORD'] as string,
+    DB: process.env['DB_NAME'] as string,
     dialect: 'mysql' as const,
     pool: {
         max: 5,
