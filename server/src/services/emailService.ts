@@ -67,5 +67,5 @@ export const sendContactMessage = async (name: string, email: string, contact: s
             <p style="white-space: pre-wrap;">${message}</p>
         </div>
     `;
-    return sendEmail('qualitycricket@gmail.com', subject, text, html);
+    return sendEmail(process.env['SUPPORT_EMAIL'] as string, subject, text, html);
 };

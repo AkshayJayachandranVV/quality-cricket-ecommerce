@@ -8,6 +8,8 @@ import {
 } from '../services/productService';
 import { verifyToken, isAdmin } from '../middleware/authMiddleware';
 import { upload } from '../middleware/uploadMiddleware';
+import { validate } from '../middleware/validateMiddleware';
+import { productValidation } from '../validations/productValidation';
 
 const router: Router = Router();
 
@@ -17,8 +19,8 @@ router.get('/top-sellers', getAllProducts); // GET /api/products/top-sellers (fo
 router.get('/:id', getProductById);       // GET /api/products/:id
 
 // Admin-Protected Product Routes
-router.post('/', verifyToken, isAdmin, upload.array('images', 4), createProduct);          // POST /api/products
-router.put('/:id', verifyToken, isAdmin, upload.array('images', 4), updateProduct);        // PUT /api/products/:id
+router.post('/', verifyToken, isAdmin, upload.array('images', 4), productValidation, validate, createProduct);          // POST /api/products
+router.put('/:id', verifyToken, isAdmin, upload.array('images', 4), productValidation, validate, updateProduct);        // PUT /api/products/:id
 router.delete('/:id', verifyToken, isAdmin, deleteProduct);     // DELETE /api/products/:id
 
 export default router;
